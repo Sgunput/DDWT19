@@ -8,6 +8,9 @@
 
 include 'model.php';
 
+/* Connect to DB */
+$database = connect_db('localhost', 'ddwt19_week1', 'ddwt19', 'ddwt19');
+
 /* Landing page */
 if (new_route('/DDWT19/week1/', 'get')) {
     /* Page info */
@@ -22,6 +25,9 @@ if (new_route('/DDWT19/week1/', 'get')) {
         'Overview' => na('/DDWT19/week1/overview/', False),
         'Add Series' => na('/DDWT19/week1/add/', False)
     ]);
+
+    /* Count series in database */
+    $nmbr_series = count_series($database);
 
     /* Page content */
     $right_column = use_template('cards');
@@ -47,31 +53,20 @@ elseif (new_route('/DDWT19/week1/overview/', 'get')) {
         'Add Series' => na('/DDWT19/week1/add/', False)
     ]);
 
+    /* Get series from database */
+    $series = get_series($database);
+
+    /* Build series table */
+    $series = get_serie_table($series);
+
+    /* Count series in database */
+    $nmbr_series = count_series($database);
+
     /* Page content */
     $right_column = use_template('cards');
     $page_subtitle = 'The overview of all series';
     $page_content = 'Here you find all series listed on Series Overview.';
-    $left_content = '
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th scope="col">Series</th>
-            <th scope="col"></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <th scope="row">House of Cards</th>
-            <td><a href="/DDWT19/week1/serie/" role="button" class="btn btn-primary">More info</a></td>
-        </tr>
-
-        <tr>
-            <th scope="row">Game of Thrones</th>
-            <td><a href="/DDWT19/week1/serie/" role="button" class="btn btn-primary">More info</a></td>
-        </tr>
-
-        </tbody>
-    </table>';
+    $left_content = $series;
 
     /* Choose Template */
     include use_template('main');
@@ -80,10 +75,12 @@ elseif (new_route('/DDWT19/week1/overview/', 'get')) {
 /* Single Serie */
 elseif (new_route('/DDWT19/week1/serie/', 'get')) {
     /* Get series from db */
-    $serie_name = 'House of Cards';
-    $serie_abstract = 'A Congressman works with his equally conniving wife to exact revenge on the people who betrayed him.';
-    $nbr_seasons = '6';
-    $creators = 'Beau Willimon';
+    $serie_id = $series['id'];
+    $serie_info = get_series_info($database, $serie_id);
+    $serie_name = $serie_info['Name'];
+    $serie_abstract = $serie_info['Abstract'];
+    $nbr_seasons = $serie_info['Seasons'];
+    $creators = $serie_info['Creator'];
 
     /* Page info */
     $page_title = $serie_name;
@@ -99,10 +96,13 @@ elseif (new_route('/DDWT19/week1/serie/', 'get')) {
         'Add Series' => na('/DDWT19/week1/add/', False)
     ]);
 
+    /* Count series in database */
+    $nmbr_series = count_series($database);
+
     /* Page content */
     $right_column = use_template('cards');
     $page_subtitle = sprintf("Information about %s", $serie_name);
-    $page_content = $serie_abstract;
+    $page_content = $serie_info;
 
     /* Choose Template */
     include use_template('serie');
@@ -123,10 +123,13 @@ elseif (new_route('/DDWT19/week1/add/', 'get')) {
         'Add Series' => na('/DDWT19/week1/add/', True)
     ]);
 
+    /* Count series in database */
+    $nmbr_series = count_series($database);
+
     /* Page content */
     $right_column = use_template('cards');
     $page_subtitle = 'Add your favorite series';
-    $page_content = 'Fill in the details of you favorite series.';
+    $page_content = 'Fill in the details of your favorite series.';
     $submit_btn = "Add Series";
     $form_action = '/DDWT19/week1/add/';
 
@@ -136,6 +139,10 @@ elseif (new_route('/DDWT19/week1/add/', 'get')) {
 
 /* Add serie POST */
 elseif (new_route('/DDWT19/week1/add/', 'post')) {
+    $serie_id = $_POST;
+    $feedback = add_series($database, $serie_id);
+    $error_msg = get_error($feedback);
+
     /* Page info */
     $page_title = 'Add Series';
     $breadcrumbs = get_breadcrumbs([
@@ -149,10 +156,13 @@ elseif (new_route('/DDWT19/week1/add/', 'post')) {
         'Add Series' => na('/DDWT19/week1/add/', True)
     ]);
 
+    /* Count series in database */
+    $nmbr_series = count_series($database);
+
     /* Page content */
     $right_column = use_template('cards');
     $page_subtitle = 'Add your favorite series';
-    $page_content = 'Fill in the details of you favorite series.';
+    $page_content = 'Fill in the details of your favorite series.';
     $submit_btn = "Add Series";
     $form_action = '/DDWT19/week1/add/';
 
@@ -162,10 +172,6 @@ elseif (new_route('/DDWT19/week1/add/', 'post')) {
 /* Edit serie GET */
 elseif (new_route('/DDWT19/week1/edit/', 'get')) {
     /* Get serie info from db */
-    $serie_name = 'House of Cards';
-    $serie_abstract = 'A Congressman works with his equally conniving wife to exact revenge on the people who betrayed him.';
-    $nbr_seasons = '6';
-    $creators = 'Beau Willimon';
 
     /* Page info */
     $page_title = 'Edit Series';
@@ -180,6 +186,9 @@ elseif (new_route('/DDWT19/week1/edit/', 'get')) {
         'Add Series' => na('/DDWT19/week1/add/', False)
     ]);
 
+    /* Count series in database */
+    $nmbr_series = count_series($database);
+
     /* Page content */
     $right_column = use_template('cards');
     $page_subtitle = sprintf("Edit %s", $serie_name);
@@ -192,10 +201,7 @@ elseif (new_route('/DDWT19/week1/edit/', 'get')) {
 /* Edit serie POST */
 elseif (new_route('/DDWT19/week1/edit/', 'post')) {
     /* Get serie info from db */
-    $serie_name = 'House of Cards';
-    $serie_abstract = 'A Congressman works with his equally conniving wife to exact revenge on the people who betrayed him.';
-    $nbr_seasons = '6';
-    $creators = 'Beau Willimon';
+
 
     /* Page info */
     $page_title = $serie_info['name'];
@@ -211,6 +217,9 @@ elseif (new_route('/DDWT19/week1/edit/', 'post')) {
         'Add Series' => na('/DDWT19/week1/add/', False)
     ]);
 
+    /* Count series in database */
+    $nmbr_series = count_series($database);
+
     /* Page content */
     $right_column = use_template('cards');
     $page_subtitle = sprintf("Information about %s", $serie_name);
@@ -222,9 +231,15 @@ elseif (new_route('/DDWT19/week1/edit/', 'post')) {
 
 /* Remove serie */
 elseif (new_route('/DDWT19/week1/remove/', 'post')) {
+    /* Get series from database */
+    $series = get_series($database);
+
+    /* Build series table */
+    $series = get_serie_table($series);
+
     /* Remove serie in database */
     $serie_id = $_POST['serie_id'];
-    $feedback = remove_serie($db, $serie_id);
+    $feedback = remove_serie($database, $serie_id);
     $error_msg = get_error($feedback);
 
     /* Page info */
@@ -240,31 +255,14 @@ elseif (new_route('/DDWT19/week1/remove/', 'post')) {
         'Add Series' => na('/DDWT19/week1/add/', False)
     ]);
 
+    /* Count series in database */
+    $nmbr_series = count_series($database);
+
     /* Page content */
     $right_column = use_template('cards');
     $page_subtitle = 'The overview of all series';
     $page_content = 'Here you find all series listed on Series Overview.';
-    $left_content = '
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th scope="col">Series</th>
-            <th scope="col"></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <th scope="row">House of Cards</th>
-            <td><a href="/DDWT19/week1/serie/" role="button" class="btn btn-primary">More info</a></td>
-        </tr>
-
-        <tr>
-            <th scope="row">Game of Thrones</th>
-            <td><a href="/DDWT19/week1/serie/" role="button" class="btn btn-primary">More info</a></td>
-        </tr>
-
-        </tbody>
-    </table>';
+    $left_content = $series;
 
     /* Choose Template */
     include use_template('main');
