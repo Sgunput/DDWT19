@@ -187,7 +187,7 @@ function get_serie_table($series){
         $table_exp .= '
         <tr>
         <th scope="row">' . $value['name'] . '</th>
-        <td><a href=“/DDWT19/week1/serie/?serie_id=' . $value['id'] . '" role="button" class="btn btn-primary">More info</a></td>
+        <td><a href="/DDWT19/week1/serie/?serie_id=' . $value['id'] . '" role="button" class="btn btn-primary">More info</a></td>
         </tr>
         ';
     }
@@ -203,7 +203,7 @@ function get_serie_table($series){
 function get_series_info($pdo, $serie_id){
     $stmt = $pdo->prepare('SELECT * FROM series WHERE id = ?');
     $stmt->execute([$serie_id]);
-    $serie_info = $stmt->fetch();
+    $serie_info = $stmt->fetchAll();
     $serie_info_exp = Array();
 
     /* Create array with htmlspecialchars */

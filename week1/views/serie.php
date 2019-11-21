@@ -36,18 +36,26 @@
                     <table class="table">
                         <tbody>
                         <tr>
-                            <th scope="row">Creators</th>
-                            <td><?= $creators ?></td>
+                            <th scope="row">Name</th>
+                            <td><?= $serie_name ?></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Abstract</th>
+                            <td><?= $serie_abstract ?></td>
                         </tr>
                         <tr>
                             <th scope="row">Number of seasons</th>
-                            <td><?= $serie_info_exp['seasons'] ?></td>
+                            <td><?= $nbr_seasons ?></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Creators</th>
+                            <td><?= $creators ?></td>
                         </tr>
                         </tbody>
                     </table>
                     <div class="row">
                         <div class="col-sm-2">
-                            <a href="/DDWT19/week1/edit/?serie_id=<?= $serie_id ?>" role="button" class="btn btn-warning">Edit</a>
+                            <a href=/DDWT19/week1/edit/?serie_id=<?= $serie_id ?> role="button" class="btn btn-warning">Edit</a>
                         </div>
                         <div class="col-sm-2">
                             <form action="/DDWT19/week1/remove/" method="POST">
